@@ -10,13 +10,21 @@ class Character{
     val maxHealth: Int = 100
     var attack: Int = 15
     var isAlive: Boolean = true
-    var mana: Int = 100
-    val maxMana: Int = 100
+    var mana: Int = 50
+    val maxMana: Int = 50
     var magicAttack: Int = 25
+    var shield: Boolean = false
 
     fun takeDamage(damage: Int){
-        health -= damage
-        println("$name получает $damage урона! HP: $health")
+        if (shield){
+            health -=(damage/2)
+            println("$name take $damage HP: $health")
+            shield = false
+        }else{
+            health -= damage
+                println("$name получает $damage урона! HP: $health")
+        }
+
 
         if (this.health <= 0){
             isAlive = false
@@ -45,15 +53,33 @@ class Character{
 
     }
         fun  fireBall(target: Character){
-            if (!isAlive) {
+            if (!isAlive && mana >= 4) {
                 println("$name ты умер ты не можешь бить")
                 return
             }else{
                 val damage = calculateDamage(magicAttack)
                 println("$name attack ${target.name}")
                 target.takeDamage(damage)
+                mana -= 5
             }
-            }
+        }
+
+}
+
+class item(val id: String,val name: String, val discriptopn: String, var cost: Int){
+    fun effect(player: Character){
+        if (id == "heal_poition"){
+            player.heal(25)
+        }else if (id == "mana_poition"){
+            println("${player.name} healed 25 HP")
+            player.mana = minOf(player.mana + 10, player.maxMana)
+            player.mana += 10
+       }
+    }
+    fun shield(player: Character){
+        player.shield = true
+        println("${player.name} take up the shield")
+    }
 }
 
 fun main(){
@@ -69,16 +95,24 @@ fun main(){
     player.mana = 100
 
     enemy.name = "Олег газманов"
-    enemy.health = 20
+    enemy.health = 100
     enemy.attack = 4
 
     println(">>> Fight <<<")
-    player.attack(enemy)
+    player.fireBall(enemy)
     enemy.attack(player)
 
     println("\n --- Cactus ---")
-    println("Player ${player.name} HP: ${player.health} / ${player.maxHealth} ${player.isAlive}")
+    println("Player ${player.name} HP: ${player.health} / ${player.maxHealth} ${player.isAlive} Mana: ${player.mana}")
     println("Player ${enemy.name} HP: ${enemy.health} / ${enemy.maxHealth} ${enemy.isAlive}")
-    println("Player ${player.name} HP: ${player.health} / ${player.maxHealth} ${player.isAlive}")
-    println("Player ${enemy.name} HP: ${enemy.health} / ${enemy.maxHealth} ${enemy.isAlive}")
+
+    val healPotion = item ("heal_potion", "Heal Potion", "healing you by 25HP", 25)
+    val manaPotion = item ("mana_potion", "Mana Potion", "Recover 10 mana", 25)
+    val shield = item("shield", "Shield", "defend damage", 60)
+
+    shield.shield(player)
+    player.fireBall(enemy)
+    enemy.attack(player)
 }
+
+
